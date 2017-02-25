@@ -13,7 +13,10 @@ DebReader::DebReader(const char* filename) {
 }
 
 DebReader::~DebReader() {
-  delete this->debfile;
+  if (this->debfile) {
+    delete this->debfile;
+    this->debfile = nullptr;
+  }
     if (this->control_buffer) {
         free(this->control_buffer);
     }

@@ -7,6 +7,7 @@ using namespace std;
 DebReader::DebReader(Nan::Callback *callback, const std::string filename)
     : Nan::AsyncWorker(callback), callback(callback) {
   this->debfile = new fakeFile(filename.c_str());
+  this->header = (deb_header *)malloc(sizeof(deb_header));
 }
 
 DebReader::~DebReader() { this->cleanup(); }
@@ -14,6 +15,7 @@ DebReader::~DebReader() { this->cleanup(); }
 int DebReader::read_header(deb_header *header) {
   READ_INTO(this->debfile, header, magic);
   if (memcmp(header->magic, "!<arch>", 7) != 0) {
+    this->cleanup();
     return 1;
   }
   read_entry(&header->header_entry);
@@ -68,6 +70,7 @@ void DebReader::list_files(size_t len) {
     return;
   }
   while (archive_read_next_header(a, &ark_entry) == ARCHIVE_OK) {
+    if (archive_entry_filetype(ark_entry) == AE_IFDIR) {continue;}  // Filter out folder entries
     this->pkg_content.push_back(archive_entry_pathname(ark_entry));
   }
   archive_read_close(a);
@@ -104,7 +107,6 @@ void DebReader::Execute() {
     this->err.assign("File size less than standard header size!");
     return;
   }
-  this->header = (deb_header *)malloc(sizeof(deb_header));
   if (this->read_header(header)) {
     this->err.assign("File invaild!");
     return;
@@ -116,6 +118,7 @@ void DebReader::Execute() {
 void DebReader::cleanup() {
   if (this->debfile != nullptr) {
     delete this->debfile;
+    this->debfile = nullptr;
   }
   if (this->header) {
     free(this->header);

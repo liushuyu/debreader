@@ -15,7 +15,7 @@ function parseControl(content, callback) {
   callback(parsed);
 }
 
-exports.read = (filename, callback) => {
+exports.read = (filename, callback, parse=true) => {
   if (typeof callback !== 'function') {
     throw new TypeError('Callback is not a function');
   }
@@ -26,6 +26,11 @@ exports.read = (filename, callback) => {
     addon.parse(path.resolve(filename), (err, res) => {
       if (err) {
         callback(err, null);
+        return;
+      }
+      if (!parse) {
+        res.controlFile = res.controlFile.trim();
+        callback(err, res);
         return;
       }
       parseControl(res.controlFile, (result) => {
