@@ -2,8 +2,8 @@
     "targets": [
         {
             "target_name": "addon",
-            "sources": ["native/mmap_file.cpp", "native/deb_read_nan.cpp",
-                        "native/addon.cpp"],
+            "sources": ["src/mmap_file.cpp", "src/deb_read_nan.cpp",
+                        "src/addon.cpp"],
             "include_dirs": [
                 "<!(node -e \"require('nan')\")"
             ],
