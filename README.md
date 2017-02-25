@@ -9,7 +9,7 @@ You need to have following packages/softwares installed:
 3. libarchive (With development files. If you can't find it in your distribution, it may come with another name like `bsdtar`. If your distribution split packages, you need to install `libarchive-dev` or similar)
 4. C++ 11 compatible compilers (Like `gcc`, `clang`)
 
-When you have everything above installed, then use `npm` to install this package (not yet available): `npm install debreader --save`
+When you have everything above installed, then use `npm` to install this package: `npm install deb-reader --save`
 
 ##### Usage
 In your project:

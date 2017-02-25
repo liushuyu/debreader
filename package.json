@@ -20,5 +20,13 @@
   ],
   "author": "liushuyu",
   "license": "MIT",
-  "gypfile": true
+  "gypfile": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liushuyu/debreader.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liushuyu/debreader/issues"
+  },
+  "homepage": "https://github.com/liushuyu/debreader#readme"
 }
