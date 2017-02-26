@@ -7,6 +7,12 @@ describe('Basic Tests', function() {
       done();
     });
   });
+  it('should read good but not very standard packages', function(done) {
+    debreader.read('tests/fud.bin', (err, res) => {
+      if (err) throw err;
+      done();
+    });
+  });
   it('should return error when reading broken packages', (done) => {
     debreader.read('tests/broken_deb.bin', (err, res) => {
       if (!err) throw new Error('WTF? It can\'t be!');

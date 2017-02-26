@@ -37,6 +37,7 @@ private:
   void list_files(size_t len);
   void read_control(size_t len);
   void pack_vector();
+  void fuzzy_ignore(size_t skip_size);
   std::string control_buffer;
   std::string err;
   int read_proxy();

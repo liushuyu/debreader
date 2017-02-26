@@ -30,7 +30,8 @@ void fakeFile::seek(const size_t pos) {
     this->m_offset = m_fsize;
     return;
   }
-//  this->memFile = pos;
+  this->memFile += (pos - this->m_offset);
+  this->m_offset = pos;
 }
 
 size_t fakeFile::size() {

@@ -32,7 +32,7 @@ int DebReader::read_entry(deb_entry *deb_entry) {
   READ_INTO(this->debfile, deb_entry, filesize);
   READ_INTO(this->debfile, deb_entry, end);
   if (memcmp(deb_entry->end, "`\x0a", 2) != 0) {
-    this->err.assign("Bad entry ending, file corrupted?");
+    this->err.assign("Bad entry ending, file corrupted? Got: " + std::string(deb_entry->end));
     return 1;
   }
   return 0;
@@ -55,8 +55,24 @@ void DebReader::iterate_entries() {
     } else if (memcmp(entry.identifier, "data.tar", 8) == 0) {
       list_files(filesize);
     }
-    this->debfile->ignore(filesize + 1);
+    this->fuzzy_ignore(filesize);
   }
+  return;
+}
+
+void DebReader::fuzzy_ignore(size_t skip_size) {
+  if (this->debfile->tell() + skip_size + 10 > this->debfile->size()) {
+    this->debfile->seek(this->debfile->size());
+    return;
+  }
+  for (size_t i = 1; i < 20; i++) {
+    int offset = (int)(i / 2) * (i % 2 ? 1 : -1);
+    if (memcmp(this->debfile->getMem() + (offset + skip_size + 58), "`\x0a", 2) == 0) {
+      this->debfile->ignore(skip_size + offset);
+      return;
+    }
+  }
+  this->err.assign("Bad entry ending, file corrupted?");
   return;
 }
 
@@ -67,6 +83,7 @@ void DebReader::list_files(size_t len) {
   archive_read_support_format_tar(a);
   int r = archive_read_open_memory(a, this->debfile->getMem(), len);
   if (r != ARCHIVE_OK) {
+    this->err.assign(archive_error_string(a));
     return;
   }
   while (archive_read_next_header(a, &ark_entry) == ARCHIVE_OK) {
