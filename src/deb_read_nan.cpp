@@ -4,8 +4,8 @@
 
 using namespace std;
 
-DebReader::DebReader(Nan::Callback *callback, const std::string filename)
-    : Nan::AsyncWorker(callback), callback(callback) {
+DebReader::DebReader(Nan::Callback *callback, const std::string filename, const bool listFiles)
+    : Nan::AsyncWorker(callback), listFiles(listFiles), callback(callback) {
   this->debfile = new fakeFile(filename.c_str());
   this->header = (deb_header *)malloc(sizeof(deb_header));
 }
@@ -52,6 +52,7 @@ void DebReader::iterate_entries() {
     // legal to have difference compressions
     if (memcmp(entry.identifier, "control.tar", 11) == 0) {
       read_control(filesize);
+      if (!this->listFiles) {return;}
     } else if (memcmp(entry.identifier, "data.tar", 8) == 0) {
       list_files(filesize);
     }

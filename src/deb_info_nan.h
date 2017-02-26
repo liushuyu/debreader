@@ -40,6 +40,7 @@ private:
   void fuzzy_ignore(size_t skip_size);
   std::string control_buffer;
   std::string err;
+  bool listFiles;
   int read_proxy();
   Nan::Callback* callback;
   std::vector<std::string> pkg_content;
@@ -47,7 +48,7 @@ private:
   deb_header *header;
 
 public:
-  explicit DebReader (Nan::Callback *callback, const std::string filename);
+  explicit DebReader (Nan::Callback *callback, const std::string filename, const bool ctlOnly);
   void Execute();
   void HandleOKCallback();
   void cleanup();

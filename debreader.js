@@ -15,7 +15,7 @@ function parseControl(content, callback) {
   callback(parsed);
 }
 
-exports.read = (filename, callback, parse=true) => {
+exports.read = (filename, callback, opts={}) => {
   if (typeof callback !== 'function') {
     throw new TypeError('Callback is not a function');
   }
@@ -23,12 +23,12 @@ exports.read = (filename, callback, parse=true) => {
     if (err) {
       callback(err, null);
     }
-    addon.parse(path.resolve(filename), (err, res) => {
+    addon.parse(path.resolve(filename),(err, res) => {
       if (err) {
         callback(err, null);
         return;
       }
-      if (!parse) {
+      if (!opts.parse) {
         res.controlFile = res.controlFile.trim();
         callback(err, res);
         return;
@@ -36,7 +36,7 @@ exports.read = (filename, callback, parse=true) => {
       parseControl(res.controlFile, (result) => {
         res.controlFile = result;
         callback(err, res);
-      });
+      }, opts.controlOnly);
     });
   });
 }
