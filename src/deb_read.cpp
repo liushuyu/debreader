@@ -13,13 +13,7 @@ DebReader::DebReader(const char* filename) {
 }
 
 DebReader::~DebReader() {
-  if (this->debfile) {
-    delete this->debfile;
-    this->debfile = nullptr;
-  }
-    if (this->control_buffer) {
-        free(this->control_buffer);
-    }
+  cleanup();
 }
 
 int DebReader::read_header(deb_header *header) {
@@ -56,13 +50,32 @@ void DebReader::iterate_entries() {
   while (this->debfile->tell() < this->debfile->size()) {
     deb_entry entry = read_entry();
     size_t filesize = atol(entry.filesize);
+    // We only compare first several chars of the identifier, since it's
+    // legal to have difference compressions
     if (memcmp(entry.identifier, "control.tar", 11) == 0) {
       read_control(filesize);
+      if (!this->listFiles) return;
     } else if (memcmp(entry.identifier, "data.tar", 8) == 0) {
       list_files(filesize);
     }
-    this->debfile->ignore(filesize);
+    this->fuzzy_ignore(filesize);
   }
+  return;
+}
+
+void DebReader::fuzzy_ignore(size_t skip_size) {
+  if (this->debfile->tell() + skip_size + 10 > this->debfile->size()) {
+    this->debfile->seek(this->debfile->size());
+    return;
+  }
+  for (size_t i = 1; i < 20; i++) {
+    int offset = (int)(i >> 1) * (i & 1 ? -1 : 1);
+    if (memcmp(this->debfile->getMem() + (offset + skip_size + 58), "`\x0a", 2) == 0) {
+      this->debfile->ignore(skip_size + offset);
+      return;
+    }
+  }
+  this->err.assign("Bad entry ending, file corrupted?");
   return;
 }
 
@@ -73,9 +86,11 @@ void DebReader::list_files(size_t len) {
   archive_read_support_format_tar(a);
   int r = archive_read_open_memory(a, this->debfile->getMem(), len);
   if (r != ARCHIVE_OK) {
+    this->err.assign(archive_error_string(a));
     return;
   }
   while (archive_read_next_header(a, &ark_entry) == ARCHIVE_OK) {
+    if (archive_entry_filetype(ark_entry) == AE_IFDIR) {continue;}  // Filter out folder entries
     this->pkg_content.push_back(archive_entry_pathname(ark_entry));
   }
   archive_read_close(a);
@@ -86,6 +101,7 @@ void DebReader::list_files(size_t len) {
 void DebReader::read_control(size_t len) {
   struct archive *a = archive_read_new();
   struct archive_entry *ark_entry;
+  char *control_buffer = NULL;
   archive_read_support_filter_all(a);
   archive_read_support_format_tar(a);
   int r = archive_read_open_memory(a, this->debfile->getMem(), len);
@@ -95,27 +111,43 @@ void DebReader::read_control(size_t len) {
   while (archive_read_next_header(a, &ark_entry) == ARCHIVE_OK) {
     if (memcmp(archive_entry_pathname(ark_entry), "./control", 9) == 0) {
       size_t entry_size = archive_entry_size(ark_entry);
-      char* control_buffer = (char*)malloc(entry_size);
-      archive_read_data(a, this->control_buffer, entry_size);
+      control_buffer = (char *)malloc(entry_size);
+      archive_read_data(a, control_buffer, entry_size);
+      this->control_buffer.assign(control_buffer);
+      free(control_buffer);
       break;
     }
   }
   archive_read_close(a);
-  archive_read_free(a);
+  archive_read_free(a); // Remember to free the memory!
   return;
 }
 
 int DebReader::read() {
   if (this->debfile->size() < this->deb_pkg_header_size) {
+    this->err.assign("File size less than standard header size!");
     return -1;
   }
   this->header = (deb_header*)malloc(sizeof(deb_header));
-  if (this->read_header(header)) {return -1;}
+  if (this->read_header(header)) {
+    this->err.assign("File invaild!");
+    return -1;
+  }
   this->iterate_entries();
   return 0;
 }
 
-char* DebReader::getControlFile() {
+void DebReader::cleanup() {
+  if (this->debfile != nullptr) {
+    delete this->debfile;
+    this->debfile = nullptr;
+  }
+  if (this->header) {
+    free(this->header);
+  }
+}
+
+std::string DebReader::getControlFile() {
   return this->control_buffer;
 }
 

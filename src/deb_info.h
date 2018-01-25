@@ -33,7 +33,12 @@ private:
   void iterate_entries();
   void list_files(size_t len);
   void read_control(size_t len);
-  char* control_buffer = nullptr;
+  void pack_vector();
+  void fuzzy_ignore(size_t skip_size);
+  std::string control_buffer;
+  std::string err;
+  bool listFiles;
+  int read_proxy();
   std::vector<std::string> pkg_content;
   fakeFile *debfile = nullptr;
   deb_header *header = nullptr;
@@ -42,7 +47,8 @@ public:
   DebReader (const std::string filename);
   DebReader (const char* filename);
   int read();
-  char* getControlFile();
+  void cleanup();
+  std::string getControlFile();
   std::vector<std::string> getFileList();
   virtual ~DebReader ();
 };
