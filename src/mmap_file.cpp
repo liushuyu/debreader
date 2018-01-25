@@ -39,6 +39,7 @@ size_t fakeFile::size() {
 }
 
 fakeFile::~fakeFile() {
+    this->seek(0);
     munmap(this->memFile, this->m_fsize);
 }
 
