@@ -1,6 +1,6 @@
 {
   "name": "deb-reader",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "Debian package reader for Node.JS",
   "main": "debreader.js",
   "dependencies": {
