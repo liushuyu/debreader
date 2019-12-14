@@ -150,7 +150,7 @@ void DebReader::HandleOKCallback() {
                                      Nan::Null()}; // Prepare callback args
   if (!this->err.empty()) {
     cb_argv[0] = Nan::Error(this->err.c_str());
-    callback->Call(2, cb_argv);  // argc=2,argv[2]
+    Nan::Call(*callback, 2, cb_argv); // argc=2,argv[2]
     return;
   }
   // Convert std::vector into v8::Array (Array type in JS world)
@@ -167,5 +167,5 @@ void DebReader::HandleOKCallback() {
            Nan::New<v8::String>(this->control_buffer).ToLocalChecked());
   Nan::Set(info, Nan::New("fileList").ToLocalChecked(), pkg_content_js);
   cb_argv[1] = info;
-  callback->Call(2, cb_argv);
+  Nan::Call(*callback, 2, cb_argv);
 }

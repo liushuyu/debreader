@@ -1,6 +1,6 @@
 {
   "name": "deb-reader",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Debian package reader for Node.JS",
   "main": "debreader.js",
   "dependencies": {
@@ -8,7 +8,7 @@
     "nan": "^2.14.0"
   },
   "devDependencies": {
-    "mocha": "^6.2.0"
+    "mocha": "^6.2.2"
   },
   "scripts": {
     "test": "./run_test.sh",
