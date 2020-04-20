@@ -8,7 +8,7 @@
     "nan": "^2.14.0"
   },
   "devDependencies": {
-    "mocha": "^6.2.2"
+    "mocha": "^7.1.1"
   },
   "scripts": {
     "test": "./run_test.sh",
