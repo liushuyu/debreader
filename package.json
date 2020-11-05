@@ -5,10 +5,10 @@
   "main": "debreader.js",
   "dependencies": {
     "bindings": "^1.5.0",
-    "nan": "^2.14.1"
+    "nan": "^2.14.2"
   },
   "devDependencies": {
-    "mocha": "^8.0.1"
+    "mocha": "^8.2.1"
   },
   "scripts": {
     "test": "./run_test.sh",

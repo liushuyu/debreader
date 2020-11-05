@@ -55,6 +55,7 @@ size_t fakeFile::read(char *dst, size_t len) {
 
 char* fakeFile::read(size_t len) {
   char* buf = (char*)malloc(len);
+  if (!buf) return NULL;
   memset(buf, 0, len);
   this->read(buf, len);
   return buf;
