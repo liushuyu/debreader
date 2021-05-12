@@ -4,7 +4,8 @@
 
 using namespace std;
 
-DebReader::DebReader(Nan::Callback *callback, const std::string filename, const bool listFiles)
+DebReader::DebReader(Nan::Callback *callback, const std::string filename,
+                     const bool listFiles)
     : Nan::AsyncWorker(callback), listFiles(listFiles), callback(callback) {
   this->debfile = new fakeFile(filename.c_str());
   this->header = (deb_header *)malloc(sizeof(deb_header));
@@ -32,7 +33,8 @@ int DebReader::read_entry(deb_entry *deb_entry) {
   READ_INTO(this->debfile, deb_entry, filesize);
   READ_INTO(this->debfile, deb_entry, end);
   if (memcmp(deb_entry->end, "`\x0a", 2) != 0) {
-    this->err.assign("Bad entry ending, file corrupted? Got: " + std::string(deb_entry->end));
+    this->err.assign("Bad entry ending, file corrupted? Got: " +
+                     std::string(deb_entry->end));
     return 1;
   }
   return 0;
@@ -52,7 +54,8 @@ void DebReader::iterate_entries() {
     // legal to have difference compressions
     if (memcmp(entry.identifier, "control.tar", 11) == 0) {
       read_control(filesize);
-      if (!this->listFiles) {return;}
+      if (!this->listFiles)
+        return;
     } else if (memcmp(entry.identifier, "data.tar", 8) == 0) {
       list_files(filesize);
     }
@@ -68,7 +71,8 @@ void DebReader::fuzzy_ignore(size_t skip_size) {
   }
   for (size_t i = 1; i < 20; i++) {
     int offset = (int)(i / 2) * (i % 2 ? 1 : -1);
-    if (memcmp(this->debfile->getMem() + (offset + skip_size + 58), "`\x0a", 2) == 0) {
+    if (memcmp(this->debfile->getMem() + (offset + skip_size + 58), "`\x0a",
+               2) == 0) {
       this->debfile->ignore(skip_size + offset);
       return;
     }
@@ -88,7 +92,9 @@ void DebReader::list_files(size_t len) {
     return;
   }
   while (archive_read_next_header(a, &ark_entry) == ARCHIVE_OK) {
-    if (archive_entry_filetype(ark_entry) == AE_IFDIR) {continue;}  // Filter out folder entries
+    if (archive_entry_filetype(ark_entry) == AE_IFDIR)
+      continue;
+    // Filter out folder entries
     this->pkg_content.push_back(archive_entry_pathname(ark_entry));
   }
   archive_read_close(a);
@@ -102,9 +108,8 @@ void DebReader::read_control(size_t len) {
   archive_read_support_filter_all(a);
   archive_read_support_format_tar(a);
   int r = archive_read_open_memory(a, this->debfile->getMem(), len);
-  if (r != ARCHIVE_OK) {
+  if (r != ARCHIVE_OK)
     return;
-  }
   while (archive_read_next_header(a, &ark_entry) == ARCHIVE_OK) {
     if (memcmp(archive_entry_pathname(ark_entry), "./control", 9) == 0) {
       size_t entry_size = archive_entry_size(ark_entry);

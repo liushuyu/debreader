@@ -1,20 +1,12 @@
 #include "mmap_file.h"
 
-fakeFile::fakeFile(const std::string filename) {
-  this->open(filename.c_str());
-}
+fakeFile::fakeFile(const std::string filename) { this->open(filename.c_str()); }
 
-fakeFile::fakeFile(const char* filename) {
-  this->open(filename);
-}
+fakeFile::fakeFile(const char *filename) { this->open(filename); }
 
-size_t fakeFile::tell() {
-  return this->m_offset;
-}
+size_t fakeFile::tell() { return this->m_offset; }
 
-char* fakeFile::getMem() {
-  return this->memFile;
-}
+char *fakeFile::getMem() { return this->memFile; }
 
 void fakeFile::ignore(const size_t pos) {
   if ((this->m_offset + pos) > this->m_fsize) {
@@ -34,13 +26,11 @@ void fakeFile::seek(const size_t pos) {
   this->m_offset = pos;
 }
 
-size_t fakeFile::size() {
-  return this->m_fsize;
-}
+size_t fakeFile::size() { return this->m_fsize; }
 
 fakeFile::~fakeFile() {
-    this->seek(0);
-    munmap(this->memFile, this->m_fsize);
+  this->seek(0);
+  munmap(this->memFile, this->m_fsize);
 }
 
 size_t fakeFile::read(char *dst, size_t len) {
@@ -53,9 +43,10 @@ size_t fakeFile::read(char *dst, size_t len) {
   return len;
 }
 
-char* fakeFile::read(size_t len) {
-  char* buf = (char*)malloc(len);
-  if (!buf) return NULL;
+char *fakeFile::read(size_t len) {
+  char *buf = (char *)malloc(len);
+  if (!buf)
+    return NULL;
   memset(buf, 0, len);
   this->read(buf, len);
   return buf;

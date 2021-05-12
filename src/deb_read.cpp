@@ -8,13 +8,11 @@ DebReader::DebReader(const std::string filename) {
   DebReader(filename.c_str());
 }
 
-DebReader::DebReader(const char* filename) {
+DebReader::DebReader(const char *filename) {
   this->debfile = new fakeFile(filename);
 }
 
-DebReader::~DebReader() {
-  cleanup();
-}
+DebReader::~DebReader() { cleanup(); }
 
 int DebReader::read_header(deb_header *header) {
   READ_INTO(this->debfile, header, magic);
@@ -54,7 +52,8 @@ void DebReader::iterate_entries() {
     // legal to have difference compressions
     if (memcmp(entry.identifier, "control.tar", 11) == 0) {
       read_control(filesize);
-      if (!this->listFiles) return;
+      if (!this->listFiles)
+        return;
     } else if (memcmp(entry.identifier, "data.tar", 8) == 0) {
       list_files(filesize);
     }
@@ -70,7 +69,8 @@ void DebReader::fuzzy_ignore(size_t skip_size) {
   }
   for (size_t i = 1; i < 20; i++) {
     int offset = (int)(i >> 1) * (i & 1 ? -1 : 1);
-    if (memcmp(this->debfile->getMem() + (offset + skip_size + 58), "`\x0a", 2) == 0) {
+    if (memcmp(this->debfile->getMem() + (offset + skip_size + 58), "`\x0a",
+               2) == 0) {
       this->debfile->ignore(skip_size + offset);
       return;
     }
@@ -90,7 +90,9 @@ void DebReader::list_files(size_t len) {
     return;
   }
   while (archive_read_next_header(a, &ark_entry) == ARCHIVE_OK) {
-    if (archive_entry_filetype(ark_entry) == AE_IFDIR) {continue;}  // Filter out folder entries
+    if (archive_entry_filetype(ark_entry) == AE_IFDIR) {
+      continue;
+    } // Filter out folder entries
     this->pkg_content.push_back(archive_entry_pathname(ark_entry));
   }
   archive_read_close(a);
@@ -128,7 +130,7 @@ int DebReader::read() {
     this->err.assign("File size less than standard header size!");
     return -1;
   }
-  this->header = (deb_header*)malloc(sizeof(deb_header));
+  this->header = (deb_header *)malloc(sizeof(deb_header));
   if (this->read_header(header)) {
     this->err.assign("File invaild!");
     return -1;
@@ -147,10 +149,6 @@ void DebReader::cleanup() {
   }
 }
 
-std::string DebReader::getControlFile() {
-  return this->control_buffer;
-}
+std::string DebReader::getControlFile() { return this->control_buffer; }
 
-std::vector<std::string> DebReader::getFileList() {
-  return this->pkg_content;
-}
+std::vector<std::string> DebReader::getFileList() { return this->pkg_content; }

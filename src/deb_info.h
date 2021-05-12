@@ -1,13 +1,14 @@
 #ifndef DEB_INFO_H
 #define DEB_INFO_H
+#include "mmap_file.h"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
-#include "mmap_file.h"
 
-#define READ_INTO(STM, STRUCT, DST)  STM->read((char*)&STRUCT->DST, sizeof(STRUCT->DST));
+#define READ_INTO(STM, STRUCT, DST)                                            \
+  STM->read((char *)&STRUCT->DST, sizeof(STRUCT->DST));
 typedef struct {
   char identifier[16];
   char timestamp[12];
@@ -44,13 +45,13 @@ private:
   deb_header *header = nullptr;
 
 public:
-  DebReader (const std::string filename);
-  DebReader (const char* filename);
+  DebReader(const std::string filename);
+  DebReader(const char *filename);
   int read();
   void cleanup();
   std::string getControlFile();
   std::vector<std::string> getFileList();
-  virtual ~DebReader ();
+  virtual ~DebReader();
 };
 
 #endif

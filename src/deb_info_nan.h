@@ -1,16 +1,17 @@
 #ifndef DEB_INFO_H
 #define DEB_INFO_H
+#include "mmap_file.h"
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <nan.h>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <nan.h>
-#include "mmap_file.h"
 
-#define READ_INTO(STM, STRUCT, DST)  STM->read((char*)&STRUCT->DST, sizeof(STRUCT->DST));
+#define READ_INTO(STM, STRUCT, DST)                                            \
+  STM->read((char *)&STRUCT->DST, sizeof(STRUCT->DST));
 typedef struct {
   char identifier[16];
   char timestamp[12];
@@ -42,17 +43,17 @@ private:
   std::string err;
   bool listFiles;
   int read_proxy();
-  Nan::Callback* callback;
+  Nan::Callback *callback;
   std::vector<std::string> pkg_content;
   fakeFile *debfile = nullptr;
   deb_header *header;
 
 public:
-  explicit DebReader (Nan::Callback *callback, const std::string filename, const bool ctlOnly);
+  explicit DebReader(Nan::Callback *callback, const std::string filename,
+                     const bool ctlOnly);
   void Execute();
   void HandleOKCallback();
   void cleanup();
-  virtual ~DebReader ();
-
+  virtual ~DebReader();
 };
 #endif
